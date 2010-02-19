@@ -54,7 +54,7 @@ namespace PixelMagic {
 				return 1;
 			}
 
-			if (extra.Count != 3)
+			if ((extra.Count != 3 && !dump) || (extra.Count != 1 && dump))
 				help = true;
 
 			if (help) {
