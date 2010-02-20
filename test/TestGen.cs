@@ -25,8 +25,8 @@ namespace ShaderTestGen
 			new TestCase ("pixelate") {
 				Effect = "shaders/Pixelate.ps",
 				InputFile = "images/test3.png",
-				CreateShader = (tc) => new ScalarShader (tc.Effect) { C0 = 20, C1 = 8  },
-				ExtraArgs = "-c0=20 -c1=8"
+				CreateShader = (tc) => new ScalarShader (tc.Effect) { C0 = 30, C1 = 15 },
+				ExtraArgs = "-c0=30 -c1=15"
 			},
 		};
 	}

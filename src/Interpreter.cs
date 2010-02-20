@@ -85,12 +85,10 @@ namespace PixelMagic {
 
 		public void Visit (TexLoad ins) {
 			if (ins.Sampler.Kind != RegKind.SamplerState)
-				throw new Exception ("bad tex input reg " + ins.Texture.Kind);
-			if (ins.Texture.Kind != RegKind.Texture)
-				throw new Exception ("bad tex coord reg");
+				throw new Exception ("bad sampler reg: " + ins.Sampler.Kind);
 
 			Sampler s = ctx.GetSampler (ins.Sampler.Number);
-			Vector4f c = ctx.GetTexture (ins.Texture.Number);
+			Vector4f c = ctx.ReadValue (ins.Texture);
 			Vector4f sample = s.Sample (c);
 
 			if (Tracing.Enabled) Console.WriteLine ("tex-load {0}[{1}] => {2}", ins.Sampler, ins.Texture, sample);
@@ -108,7 +106,9 @@ namespace PixelMagic {
 			case BinOpKind.Mul:
 				res = a * b;
 				break;
-			}
+				default:
+				throw new Exception ("Cant handle " + ins.Operation);
+		}
 
 			if (Tracing.Enabled) Console.WriteLine ("{0} {1} {2} => {3}/{4} == {5}", ins.Source1, ins.Operation, ins.Source2, a, b, res);
 			ctx.StoreValue (ins.Dest, res);
@@ -118,9 +118,16 @@ namespace PixelMagic {
 			Vector4f a = ctx.ReadValue (ins.Source);
 			Vector4f res = new Vector4f ();
 			switch (ins.Operation) {
-			case UnaryOpKind.Rcp:
-				res = a.Reciprocal ();
+			case UnaryOpKind.Rcp: {
+				//Reciprocal intrinsic precision is too small
+				res = new Vector4f (1f) / a;
 				break;
+			}
+			case UnaryOpKind.Frc:
+				res = a.FractionalPart ();
+				break;
+			default:
+				throw new Exception ("Cant handle " + ins.Operation);
 			}
 
 			if (Tracing.Enabled) Console.WriteLine ("{0} {1} => {2} == {3}", ins.Source, ins.Operation, a, res);
@@ -133,7 +140,28 @@ namespace PixelMagic {
 		}
 
 		public void Visit (TernaryOp ins) {
-			throw new Exception ("can't handle " + ins);
+			Vector4f a = ctx.ReadValue (ins.Source1);
+			Vector4f b = ctx.ReadValue (ins.Source2);
+			Vector4f c = ctx.ReadValue (ins.Source3);
+			Vector4f res = new Vector4f ();
+			switch (ins.Operation) {
+			case TernaryOpKind.Cmp: {// a >= 0 ? b : c
+				//m = a < [0,0,0,0]
+				Vector4f mask = a.CompareLessThan (new Vector4f ()); //we change to a <b
+				//res = (m & C) | (~m & B) -- this could be replaced by a blendps
+				res = (mask & c) | mask.AndNot (b);
+				break;
+			}
+			case TernaryOpKind.Mad: {// a *  b + c
+				res = (a * b) + c;
+				break;
+			}
+			default:
+				throw new Exception ("Cant handle " + ins.Operation);
+			}
+
+			if (Tracing.Enabled) Console.WriteLine ("{0} {1} {2} {3} => {4}/{5}/{6} == {7}", ins.Source1, ins.Operation, ins.Source2, ins.Source3, a, b, c, res);
+			ctx.StoreValue (ins.Dest, res);	
 		}
 	}
 
@@ -183,6 +211,8 @@ namespace PixelMagic {
 				return constants [reg.Number];
 			case RegKind.ColorOut:
 				return colorOut [reg.Number];
+			case RegKind.Texture:
+				return textures [reg.Number];	
 			default:
 				throw new Exception ("can't handle reg load of type " + reg.Kind);
 			}
@@ -190,7 +220,7 @@ namespace PixelMagic {
 
 		internal Vector4f ReadValue (SrcRegister src) {
 			Vector4f val = GetReg (src);
-			if (Tracing.Enabled) Console.WriteLine ("\t {0} -> {1}", src, val);
+			//if (Tracing.Enabled) Console.WriteLine ("\t {0} -> {1}", src, val);
 
 			val = val.Shuffle ((ShuffleSel)src.Swizzle);
 			switch (src.Modifier) {
