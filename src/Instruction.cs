@@ -60,7 +60,6 @@ namespace PixelMagic {
 
 		public abstract void Visit (InstructionVisitor visitor);
 
-		public virtual void EmitHeader (CodeGenContext ctx) {}
 		public virtual void EmitBody (CodeGenContext ctx) {}
 	}
 
@@ -88,10 +87,6 @@ namespace PixelMagic {
 		public override string ToString () {
 			return String.Format ("set-const {0} = {1}", reg, val);
 		}
-
-		public override void EmitHeader (CodeGenContext ctx) {
-			ctx.DefineConst (reg, val);
-		}
 	}
 
 	public class DefVar : Instruction {
@@ -107,12 +102,16 @@ namespace PixelMagic {
 			visitor.Visit (this);
 		}
 
-		public override string ToString () {
-			return String.Format ("def-var {0}/{1}", reg, kind);
+		public TextureKind Kind {
+			get { return kind; }
 		}
 
-		public override void EmitHeader (CodeGenContext ctx) {
-			ctx.DefineVar (kind, reg);
+		public DestRegister Dest {
+			get { return reg; }
+		}
+
+		public override string ToString () {
+			return String.Format ("def-var {0}/{1}", reg, kind);
 		}
 
 	}

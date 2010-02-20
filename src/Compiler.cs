@@ -36,6 +36,104 @@ using Mono.Simd;
 namespace PixelMagic {
 	public delegate void CompiledShader (ShaderData data);
 
+	internal class HeaderWriterVisitor : InstructionVisitor {
+		CodeGenContext ctx;
+
+		internal HeaderWriterVisitor (CodeGenContext ctx) {
+			this.ctx = ctx;
+		}
+
+		public void Visit (SetConst ins) {
+			ctx.DefineConst (ins.Number, ins.Value);
+		}
+
+		public void Visit (DefVar ins) {
+			ctx.DefineVar (ins.Dest, ins.Kind);
+		}
+
+		public void Visit (TexLoad ins) {
+		}
+
+		public void Visit (BinaryOp ins) {
+		}
+
+		public void Visit (UnaryOp ins) {
+		}
+
+		public void Visit (Mov ins) {
+		}
+	}
+
+	internal class ShaderRequisitesVisitor : InstructionVisitor {
+		/*if true constant is external*/
+		Dictionary <int, bool> constantMap = new Dictionary <int, bool> ();
+		HashSet <int> writeMasks = new HashSet <int> ();
+		CodeGenContext ctx;
+
+		internal ShaderRequisitesVisitor (CodeGenContext ctx) {
+			this.ctx = ctx;
+		}
+
+		internal void LoadExternalVars () {
+			foreach (var cons in constantMap) {
+				//Console.WriteLine ("const {0} external {1}", cons.Key, cons.Value);
+				if (cons.Value)
+					ctx.LoadConst (cons.Key);
+			}
+			foreach (var wm in writeMasks) {
+				//Console.WriteLine ("mask {0:X}", wm);
+				ctx.GetMask (wm);
+			}
+		}
+
+		void VisitReg (Register reg) {
+			if (reg.Kind == RegKind.Constant) {
+				if (!constantMap.ContainsKey (reg.Number))
+					constantMap [reg.Number] = true;
+			}
+		}
+
+		void VisitSrcReg (SrcRegister src) {
+			VisitReg (src);
+		}
+
+		void VisitDestReg (DestRegister dest) {
+			VisitReg (dest);
+			if (dest.WriteMask != 0xF)
+				writeMasks.Add (dest.WriteMask);
+		}
+
+		public void Visit (SetConst ins) {
+			constantMap [ins.Number] = false;
+		}
+
+		public void Visit (DefVar ins) {
+			VisitDestReg (ins.Dest);
+		}
+
+		public void Visit (TexLoad ins) {
+			VisitSrcReg (ins.Sampler);
+			VisitSrcReg (ins.Texture);
+			VisitDestReg (ins.Dest);
+		}
+
+		public void Visit (BinaryOp ins) {
+			VisitSrcReg (ins.Source1);
+			VisitSrcReg (ins.Source2);
+			VisitDestReg (ins.Dest);
+		}
+
+		public void Visit (UnaryOp ins) {
+			VisitSrcReg (ins.Source);
+			VisitDestReg (ins.Dest);			
+		}
+
+		public void Visit (Mov ins) {
+			VisitSrcReg (ins.Source);
+			VisitDestReg (ins.Dest);			
+		}
+	}
+
 	public class CodeGenContext {
 		const string ASSEMBLY_NAME = "ShaderLib";
 
@@ -77,12 +175,18 @@ namespace PixelMagic {
 		}
 
 		public CompiledShader Compile () {
-			//FIXME we must collect used consts & temps before code gen. So we can init/load them properly
+			ShaderRequisitesVisitor reqs = new ShaderRequisitesVisitor (this);
+			foreach (var i in insList)
+				i.Visit (reqs);
 
+			reqs.LoadExternalVars ();
+
+			HeaderWriterVisitor header = new HeaderWriterVisitor (this);
 			//Emit code to load used vars & consts
 			foreach (var i in insList)
-				i.EmitHeader (this);
+				i.Visit (header);
 
+			
 			EmitLoopVars ();
 
 			EmitLoopStart ();
@@ -263,7 +367,20 @@ namespace PixelMagic {
 			LoadLiteral (lb, initialVal);
 		}
 
-		internal void DefineVar (TextureKind kind, DestRegister reg) {
+		internal void LoadConst (int num) {
+			if (constMap.ContainsKey (num))
+				throw new Exception (String.Format ("constant {0} already defined", num));
+
+			LocalBuilder lb = DeclareLocal (typeof (Vector4f), "const_" + num);
+			constMap [num] = lb;
+
+			ilgen.Emit (OpCodes.Ldarg_0);
+			ilgen.Emit (OpCodes.Ldc_I4, num);
+			ilgen.Emit (OpCodes.Call, typeof (ShaderData).GetMethod ("GetConstantOrZero"));
+			ilgen.Emit (OpCodes.Stloc, lb);
+		}
+
+		internal void DefineVar (DestRegister reg, TextureKind kind) {
 			switch (reg.Kind) {
 			case RegKind.Texture:
 				if (tex0 != null)
@@ -369,6 +486,7 @@ namespace PixelMagic {
 
 		internal void StoreValue (DestRegister dst) {
 			var dest = GetReg (dst.Kind, dst.Number);
+			/*FIXME we must merge the instruction mask with the dest var mask.*/
 			if (dst.WriteMask != 0xF) {
 				//return 
 

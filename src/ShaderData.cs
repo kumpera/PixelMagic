@@ -59,6 +59,12 @@ namespace PixelMagic {
 			return constants [idx];
 		}
 
+		public Vector4f GetConstantOrZero (int idx) {
+			if (!constants.ContainsKey (idx))
+				return new Vector4f ();
+			return constants [idx];
+		}
+
 		internal Dictionary <int,Vector4f> GetConstants () {
 			return constants;
 		}
