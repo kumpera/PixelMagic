@@ -27,7 +27,13 @@ Compiler:
 	Enforce declared variable write mask on stores.
 
 TestSuite:
-	
+
+Known Issues
+============
+
+Mono 2.6 release on OSX miscompiles Mono.Simd code. Trunk works fine, check tip of 2.6.
+
+
 
 Links
 =====
