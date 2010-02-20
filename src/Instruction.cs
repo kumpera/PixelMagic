@@ -192,7 +192,7 @@ namespace PixelMagic {
 		}
 
 		public override string ToString () {
-			return String.Format ("{0} = {1} {2} ? {3} : {4} ", dest, src1, op, src2, src3);
+			return String.Format ("{0} = {1} {2} {3}, {4} ", dest, src1, op, src2, src3);
 		}
 	}
 
