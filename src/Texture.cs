@@ -69,9 +69,25 @@ namespace PixelMagic {
 			this.tex = tex;
 		}
 
+		static float Clamp (float x) {
+			if (x < 0f)
+				return 0f;
+			if (x > 1f)
+				return 1f;
+			return x;
+		}
+
+		static int Clamp (int x, int max) {
+			if (x < 0)
+				return 0;
+			if (x >= max)
+				return max - 1;
+			return x;
+		}
+
 		public Vector4f Sample (Vector4f coord) {
-			int x = (int) (coord.X * tex.Width);
-			int y = (int) (coord.Y * tex.Height);
+			int x = Clamp ((int)(coord.X * tex.Width), tex.Width);
+			int y = Clamp ((int)(coord.Y * tex.Height), tex.Width);
 			Vector4f color = tex.ReadColor (x, y);
 
 			if (Tracing.Enabled) Console.WriteLine ("sampling {0} -> [{1}, {2}] -> {3}", coord, x, y, color);
