@@ -71,6 +71,14 @@ namespace PixelMagic {
 			return new UnaryOp (op, dst, src);
 		}
 
+		Instruction ParseTernary (TernaryOpKind op) {
+			DestRegister dst = ParseDestReg ();
+			SrcRegister src1 = ParseSrcReg ();
+			SrcRegister src2 = ParseSrcReg ();
+			SrcRegister src3 = ParseSrcReg ();
+			return new TernaryOp (op, dst, src1, src2, src3);
+		}
+
 		Instruction ParseDcl () {
 			int token = 0;
 			if (!Read (ref token))
@@ -159,11 +167,17 @@ namespace PixelMagic {
 				case 0x02:
 					ins = ParseBinOp (BinOpKind.Add);
 					break;
+				case 0x4:
+					ins = ParseTernary (TernaryOpKind.Mad);
+					break;
 				case 0x05:
 					ins = ParseBinOp (BinOpKind.Mul);
 					break;
 				case 0x06:
 					ins = ParseUnOp (UnaryOpKind.Rcp);
+					break;
+				case 0x13:
+				ins = ParseUnOp (UnaryOpKind.Frc);
 					break;
 				case 0x1F:
 					ins = ParseDcl ();
@@ -174,8 +188,11 @@ namespace PixelMagic {
 				case 0x51:
 					ins = ParseDef ();
 					break;
+				case 0x58:
+					ins = ParseTernary (TernaryOpKind.Cmp);
+					break;
 				default:
-					throw new Exception ("invalid kind "+kind);
+					throw new Exception ("invalid kind 0x" + kind.ToString ("X"));
 				}
 				if (((v >> 28) & 0x1) == 0x1)
 					ins.Predicate = ParseSrcReg ();

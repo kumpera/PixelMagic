@@ -131,6 +131,10 @@ namespace PixelMagic {
 			Vector4f a = ctx.ReadValue (ins.Source);
 			ctx.StoreValue (ins.Dest, a);
 		}
+
+		public void Visit (TernaryOp ins) {
+			throw new Exception ("can't handle " + ins);
+		}
 	}
 
 	internal class ShaderContext {

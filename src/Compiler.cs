@@ -62,6 +62,10 @@ namespace PixelMagic {
 
 		public void Visit (Mov ins) {
 		}
+
+		public void Visit (TernaryOp ins) {
+			throw new Exception ("can't handle " + ins);
+		}
 	}
 
 	internal class ShaderRequisitesVisitor : InstructionVisitor {
@@ -132,6 +136,10 @@ namespace PixelMagic {
 			VisitSrcReg (ins.Source);
 			VisitDestReg (ins.Dest);			
 		}
+
+		public void Visit (TernaryOp ins) {
+			throw new Exception ("can't handle " + ins);
+		}
 	}
 
 	internal class CodeGenVisitor : InstructionVisitor {
@@ -173,6 +181,10 @@ namespace PixelMagic {
 		public void Visit (Mov ins) {
 			ctx.LoadValue (ins.Source);
 			ctx.StoreValue (ins.Dest);
+		}
+
+		public void Visit (TernaryOp ins) {
+			throw new Exception ("can't handle " + ins);
 		}
 	}
 

@@ -30,13 +30,20 @@ using System;
 using Mono.Simd;
 
 namespace PixelMagic {
+	public enum TernaryOpKind {
+		Mad,
+		Cmp
+	}
+
+
 	public enum BinOpKind {
 		Add,
 		Mul
 	}
 
 	public enum UnaryOpKind {
-		Rcp
+		Rcp,
+		Frc
 	}
 
 	public enum TextureKind {
@@ -50,6 +57,7 @@ namespace PixelMagic {
 		void Visit (SetConst ins);
 		void Visit (DefVar ins);
 		void Visit (TexLoad ins);
+		void Visit (TernaryOp ins);
 		void Visit (BinaryOp ins);
 		void Visit (UnaryOp ins);
 		void Visit (Mov ins);
@@ -143,6 +151,48 @@ namespace PixelMagic {
 
 		public override string ToString () {
 			return String.Format ("texld {0} = {1}[{2}]", dest, sampler, tex);
+		}
+	}
+
+	public class TernaryOp : Instruction {
+		TernaryOpKind op;
+		DestRegister dest;
+		SrcRegister src1, src2, src3;
+
+		public TernaryOp (TernaryOpKind op, DestRegister dest, SrcRegister src1, SrcRegister src2, SrcRegister src3) {
+			this.op = op;
+			this.dest = dest;
+			this.src1 = src1;
+			this.src2 = src2;
+			this.src3 = src3;
+		}
+
+		public override void Visit (InstructionVisitor visitor) {
+			visitor.Visit (this);
+		}
+
+		public TernaryOpKind Operation {
+			get { return op; }
+		}
+
+		public DestRegister Dest {
+			get { return dest; }
+		}
+
+		public SrcRegister Source1 {
+			get { return src1; }
+		}
+
+		public SrcRegister Source2 {
+			get { return src2; }
+		}
+
+		public SrcRegister Source3 {
+			get { return src3; }
+		}
+
+		public override string ToString () {
+			return String.Format ("{0} = {1} {2} ? {3} : {4} ", dest, src1, op, src2, src3);
 		}
 	}
 
