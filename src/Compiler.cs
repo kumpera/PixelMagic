@@ -134,6 +134,48 @@ namespace PixelMagic {
 		}
 	}
 
+	internal class CodeGenVisitor : InstructionVisitor {
+		CodeGenContext ctx;
+
+		internal CodeGenVisitor (CodeGenContext ctx) {
+			this.ctx = ctx;
+		}
+
+		public void Visit (SetConst ins) {
+		}
+
+		public void Visit (DefVar ins) {
+		}
+
+		public void Visit (TexLoad ins) {
+			if (ins.Sampler.Kind != RegKind.SamplerState)
+				throw new Exception ("bad sampler input reg " + ins.Sampler.Kind);
+			if (ins.Texture.Kind != RegKind.Texture)
+				throw new Exception ("bad tex coord reg " + ins.Texture.Kind);
+
+			ctx.SampleTexture (ins.Sampler.Number, ins.Texture.Number);
+			ctx.StoreValue (ins.Dest);
+		}
+
+		public void Visit (BinaryOp ins) {
+			ctx.LoadValue (ins.Source1);
+			ctx.LoadValue (ins.Source2);
+			ctx.EmitBinary (ins.Operation);
+			ctx.StoreValue (ins.Dest);
+		}
+
+		public void Visit (UnaryOp ins) {
+			ctx.LoadValue (ins.Source);
+			ctx.EmitUnary (ins.Operation);
+			ctx.StoreValue (ins.Dest);
+		}
+
+		public void Visit (Mov ins) {
+			ctx.LoadValue (ins.Source);
+			ctx.StoreValue (ins.Dest);
+		}
+	}
+
 	public class CodeGenContext {
 		const string ASSEMBLY_NAME = "ShaderLib";
 
@@ -191,8 +233,10 @@ namespace PixelMagic {
 
 			EmitLoopStart ();
 
+
+			CodeGenVisitor codegen = new CodeGenVisitor (this);
 			foreach (var i in insList)
-				i.EmitBody (this);
+				i.Visit (codegen);
 
 			EmitLoopTail ();
 

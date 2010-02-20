@@ -59,8 +59,6 @@ namespace PixelMagic {
 		public SrcRegister Predicate { get; set; }
 
 		public abstract void Visit (InstructionVisitor visitor);
-
-		public virtual void EmitBody (CodeGenContext ctx) {}
 	}
 
 	public class SetConst : Instruction {
@@ -146,18 +144,6 @@ namespace PixelMagic {
 		public override string ToString () {
 			return String.Format ("texld {0} = {1}[{2}]", dest, sampler, tex);
 		}
-
-
-		public override void EmitBody (CodeGenContext ctx) {
-			if (sampler.Kind != RegKind.SamplerState)
-				throw new Exception ("bad tex input reg "+tex.Kind);
-			if (tex.Kind != RegKind.Texture)
-				throw new Exception ("bad tex coord reg");
-
-			ctx.SampleTexture (sampler.Number, tex.Number);
-			ctx.StoreValue (dest);
-		}
-
 	}
 
 	public class BinaryOp : Instruction {
@@ -193,13 +179,6 @@ namespace PixelMagic {
 			get { return src2; }
 		}
 
-		public override void EmitBody (CodeGenContext ctx) {
-			ctx.LoadValue (src1);
-			ctx.LoadValue (src2);
-			ctx.EmitBinary (op);
-			ctx.StoreValue (dest);
-		}
-
 		public override string ToString () {
 			return String.Format ("{0} = {1} {2} {3}", dest, src1, op, src2);
 		}
@@ -232,12 +211,6 @@ namespace PixelMagic {
 			get { return src; }
 		}
 
-		public override void EmitBody (CodeGenContext ctx) {
-			ctx.LoadValue (src);
-			ctx.EmitUnary (op);
-			ctx.StoreValue (dest);
-		}
-
 		public override string ToString () {
 			return String.Format ("{0} = {1} {2}", dest, op, src);
 		}
@@ -262,11 +235,6 @@ namespace PixelMagic {
 
 		public SrcRegister Source {
 			get { return src; }
-		}
-
-		public override void EmitBody (CodeGenContext ctx) {
-			ctx.LoadValue (src);
-			ctx.StoreValue (dest);
 		}
 
 		public override string ToString () {
