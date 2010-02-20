@@ -23,11 +23,11 @@ Compiler:
 	Texture coords should be folded into a pair of floats if only used with texload
 	Maybe eliminate the i,j loop variables and test for tex.x|y < 0
 	Remove the fdiv in the inner loop, cache hq / 2 in a variable outside
-	Use loop tilling if any sampler is doing bilinear filtering or if we detect that fetches are transformed
+	Use loop tilling if any sampler is doing bilinear filtering or if we detect that fetches are transformed.
+	Enforce declared variable write mask on stores.
 
 TestSuite:
-	Add support for maximum allowed error rate
-
+	
 
 Links
 =====
