@@ -52,7 +52,7 @@ namespace ShaderTestGen
 			double t = Tolerance == 0 ? DefaultTolerance : Tolerance;
 
 			Apply (shader, bitmap, reference);
-			runscript.WriteLine ("{0} {1} {2} {3} {4} {5} {6} {7}", TestName, Effect, InputFile, reference, t, ExtraArgs);
+			runscript.WriteLine ("{0} {1} {2} {3} {4} {5}", TestName, Effect, InputFile, reference, t, ExtraArgs);
 		}
 
 		static void Apply (Shader shader, BitmapImage bitmap, string destImage) {

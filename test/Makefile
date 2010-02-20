@@ -7,7 +7,7 @@ test-runner.exe: TestRunner.cs
 generate-stamp: test-gen.exe
 	mkdir -p references
 	mkdir -p results
-	testgen.exe
+	test-gen.exe
 	touch generate-stamp
 
 run-tests: test-runner.exe

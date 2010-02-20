@@ -95,9 +95,9 @@ public class Driver {
 			var shader = args [1];
 			var input = args [2];
 			var reference = args [3];
-			var tolerance = double.Parse (args [6]);
+			var tolerance = double.Parse (args [4]);
 			var extra = "";
-			for (int i = 7; i < args.Length; ++i)
+			for (int i = 5; i < args.Length; ++i)
 				extra += args [i] + " ";
 
 			string result = string.Format ("results/{0}.png", test_name);
