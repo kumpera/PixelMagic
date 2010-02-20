@@ -439,7 +439,7 @@ namespace PixelMagic {
 		}
 
 		internal void EmitBinary (BinOpKind op) {
-			//FIXME if might be an issue if arguments are not of type Vector4f
+			//FIXME it might be an issue if arguments are not of type Vector4f
 			MethodInfo mi = null;
 			switch (op) {
 			case BinOpKind.Add:
@@ -454,6 +454,18 @@ namespace PixelMagic {
 			ilgen.Emit (OpCodes.Call, mi);
 		}
 
+		internal void EmitUnary (UnaryOpKind op) {
+			MethodInfo mi = null;
+			switch (op) {
+			case UnaryOpKind.Rcp:
+				mi = typeof (VectorOperations).GetMethod ("Reciprocal");
+				break;
+			default:
+				throw new Exception ("can't handle unop " + op);
+			}
+			ilgen.Emit (OpCodes.Call, mi);
+		}
+
 		void EmitVectorCast (Type src, Type to) {
 			MethodInfo mi = null;
 			foreach (var m in src.GetMethods (BindingFlags.Public | BindingFlags.Static)) {
@@ -464,7 +476,6 @@ namespace PixelMagic {
 			}
 			ilgen.Emit (OpCodes.Call, mi);
 		}
-
 
 		internal LocalBuilder GetMask (int writeMask) {
 			if (!maskMap.ContainsKey (writeMask)) {

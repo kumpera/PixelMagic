@@ -233,11 +233,9 @@ namespace PixelMagic {
 		}
 
 		public override void EmitBody (CodeGenContext ctx) {
-			throw new Exception ("can't handle " + this);
-			/*ctx.LoadValue (src1);
-			ctx.LoadValue (src2);
-			ctx.EmitBinary (op);
-			ctx.StoreValue (dest);*/
+			ctx.LoadValue (src);
+			ctx.EmitUnary (op);
+			ctx.StoreValue (dest);
 		}
 
 		public override string ToString () {
