@@ -14,13 +14,19 @@ namespace ShaderTestGen
 		public static readonly TestCase[] Tests = new TestCase[] {
 			new TestCase ("invert-color") {
 				Effect = "shaders/InvertColor.ps",
-				InputFile = "images/test2.png"
+				InputFile = "images/test3.png"
 			},
 			new TestCase ("bright-extract") {
 				Effect = "shaders/BrightExtract.ps",
-				InputFile = "images/test2.png",
-				CreateShader = (tc) => new SingleScalarShader (tc.Effect) { Scalar = 0.5 },
+				InputFile = "images/test3.png",
+				CreateShader = (tc) => new ScalarShader (tc.Effect) { C0 = 0.5f },
 				ExtraArgs = "-c0=0.5"
+			},
+			new TestCase ("pixelate") {
+				Effect = "shaders/Pixelate.ps",
+				InputFile = "images/test3.png",
+				CreateShader = (tc) => new ScalarShader (tc.Effect) { C0 = 20, C1 = 8  },
+				ExtraArgs = "-c0=20 -c1=8"
 			},
 		};
 	}
