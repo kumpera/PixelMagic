@@ -39,13 +39,13 @@ namespace PixelMagic {
 		public abstract void Write (int x, int y, uint rgba);
 
 		public void WriteColor (int x, int y, Vector4f color) {
-			uint r = (uint)(color.X * 255);
-			uint g = (uint)(color.Y * 255);
-			uint b = (uint)(color.Z * 255);
-			uint a = (uint)(color.W * 255);
+			uint r = (uint)Math.Round (color.X * 255);
+			uint g = (uint)Math.Round (color.Y * 255);
+			uint b = (uint)Math.Round (color.Z * 255);
+			uint a = (uint)Math.Round (color.W * 255);
 			uint p = r | (g << 8) | (b << 16) | (a << 24);
 
-			if (Tracing.Enabled) Console.WriteLine ("store {0:X} at [{1}, {2}] from {3}", p, x, y, color);
+			if (Tracing.Enabled) Console.WriteLine ("store {0:X8} at [{1}, {2}] from {3}", p, x, y, color);
 			Write (x, y, p);
 		}
 
