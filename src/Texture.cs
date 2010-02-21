@@ -43,7 +43,7 @@ namespace PixelMagic {
 			uint g = (uint)Math.Round (color.Y * 255);
 			uint b = (uint)Math.Round (color.Z * 255);
 			uint a = (uint)Math.Round (color.W * 255);
-			uint p = r | (g << 8) | (b << 16) | (a << 24);
+			uint p = b | (g << 8) | (r << 16) | (a << 24);
 
 			if (Tracing.Enabled) Console.WriteLine ("store {0:X8} at [{1}, {2}] from {3}", p, x, y, color);
 			Write (x, y, p);
@@ -51,9 +51,12 @@ namespace PixelMagic {
 
 		public Vector4f ReadColor (int x, int y) {
 			uint p = Read (x, y);
-			float r = (p & 0xFF) / 255f;
+			//float r = (p & 0xFF) / 255f;
+			//float b = ((p >> 16) & 0xFF) / 255f;
+
+			float b = (p & 0xFF) / 255f;
 			float g = ((p >> 8) & 0xFF) / 255f;
-			float b = ((p >> 16) & 0xFF) / 255f;
+			float r = ((p >> 16) & 0xFF) / 255f;
 			float a = ((p >> 24) & 0xFF) / 255f;
 
 			Vector4f color = new Vector4f (r, g, b, a);
