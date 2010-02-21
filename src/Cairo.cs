@@ -77,8 +77,8 @@ namespace PixelMagic.Cairo
 		IntPtr surface;
 		bool disposed;
 
-		public CairoImageSurface (int width, int heigth) {
-			surface = cairo_image_surface_create ((int)CairoFormat.RGB24, width, heigth);
+		public CairoImageSurface (int width, int heigth, CairoFormat format) {
+			surface = cairo_image_surface_create ((int)format, width, heigth);
 			if (surface == IntPtr.Zero)
 				throw new ArgumentException ("could not create surface");
 
@@ -119,7 +119,7 @@ namespace PixelMagic.Cairo
 
 
 		public CairoImageSurface CreateSimilar () {
-			return new CairoImageSurface (Width, Height);
+			return new CairoImageSurface (Width, Height, Format);
 		}
 
 		public void SaveToPng (string file) {
