@@ -177,6 +177,8 @@ namespace PixelMagic {
 		public DestRegister (int val) : base (val) {
 			WriteMask = (val >> 16) & 0xF;
 			int stuff = (val >> 20) & 0x7;
+			if ((stuff & 0x1) != 0)
+				Saturate = true;
 			if ((stuff & 0x2) != 0)
 				PartialPrecision = true;
 			if ((stuff & 0x4) != 0)
@@ -197,6 +199,7 @@ namespace PixelMagic {
 		}
 
 		public int WriteMask { get; private set; }
+		public bool Saturate { get; private set; }
 		public bool PartialPrecision { get; private set; }
 		public bool Centroid { get; private set; }
 
@@ -213,6 +216,8 @@ namespace PixelMagic {
 				if ((WriteMask & 0x8) == 0x8)
 					str += "a";
 			}
+			if (Saturate)
+				str += "_s";
 			if (PartialPrecision)
 				str += "_pp";
 			if (Centroid)
