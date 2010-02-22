@@ -28,6 +28,18 @@ namespace ShaderTestGen
 				CreateShader = (tc) => new ScalarShader (tc.Effect) { C0 = 30, C1 = 15 },
 				ExtraArgs = "-c0=30 -c1=15"
 			},
+			new TestCase ("copy-16") {
+				Effect = "shaders/CopyPos.ps",
+				InputFile = "images/16x16-white.png"
+			},
+			new TestCase ("copy-256") {
+				Effect = "shaders/CopyPos.ps",
+				InputFile = "images/256x256-white.png"
+			},
+			new TestCase ("mix-16") {
+				Effect = "shaders/MixChannels.ps",
+				InputFile = "images/test3.png"
+			},
 		};
 	}
 
