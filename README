@@ -27,11 +27,21 @@ Compiler:
 	Enforce declared variable write mask on stores.
 	Better code can be generated for single component write masks.
 	Detect SSE4 and use BLENDPS for masks.
+	Figure out texture coord regs and generalize current code.
 
 Math:
-	Figure out to to implement FRC with decent speed
+	Figure out to to implement FRC with decent speed.
+	Use some of gallium's tricks to improve speed of some ops.
+
+Misc:
+	The texture read/write code is not endian safe.
 
 TestSuite:
+	We produce some artifacts with pixelate.
+
+Mono:
+	JIT "newobj Vector4f" property.
+	When passing float constants to setters/constructors avoid the slow FPU->memory->XMM path.
 
 Known Issues
 ============
