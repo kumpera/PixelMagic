@@ -156,6 +156,12 @@ namespace PixelMagic {
 				res = (a * b) + c;
 				break;
 			}
+			case TernaryOpKind.SinCos: { // sin(a) , cos(a)
+				//XXX maybe we should use the macro expansion provided in the driver docs for HLSL
+				res.X = (float)Math.Cos (a.X);
+				res.Y = (float)Math.Sin (a.X);
+				break;
+			}
 			default:
 				throw new Exception ("Cant handle " + ins.Operation);
 			}
