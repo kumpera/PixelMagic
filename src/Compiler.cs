@@ -64,7 +64,6 @@ namespace PixelMagic {
 		}
 
 		public void Visit (TernaryOp ins) {
-			throw new Exception ("can't handle " + ins);
 		}
 	}
 
@@ -138,7 +137,10 @@ namespace PixelMagic {
 		}
 
 		public void Visit (TernaryOp ins) {
-			throw new Exception ("can't handle " + ins);
+			VisitSrcReg (ins.Source1);
+			VisitSrcReg (ins.Source2);
+			VisitSrcReg (ins.Source3);
+			VisitDestReg (ins.Dest);
 		}
 	}
 
@@ -158,10 +160,7 @@ namespace PixelMagic {
 		public void Visit (TexLoad ins) {
 			if (ins.Sampler.Kind != RegKind.SamplerState)
 				throw new Exception ("bad sampler input reg " + ins.Sampler.Kind);
-			if (ins.Texture.Kind != RegKind.Texture)
-				throw new Exception ("bad tex coord reg " + ins.Texture.Kind);
-
-			ctx.SampleTexture (ins.Sampler.Number, ins.Texture.Number);
+			ctx.SampleTexture (ins.Sampler.Number, ins.Texture);
 			ctx.StoreValue (ins.Dest);
 		}
 
@@ -173,8 +172,7 @@ namespace PixelMagic {
 		}
 
 		public void Visit (UnaryOp ins) {
-			ctx.LoadValue (ins.Source);
-			ctx.EmitUnary (ins.Operation);
+			ctx.EmitUnary (ins);
 			ctx.StoreValue (ins.Dest);
 		}
 
@@ -184,7 +182,8 @@ namespace PixelMagic {
 		}
 
 		public void Visit (TernaryOp ins) {
-			throw new Exception ("can't handle " + ins);
+			ctx.EmitTernary (ins);
+			ctx.StoreValue (ins.Dest);
 		}
 	}
 
@@ -206,6 +205,8 @@ namespace PixelMagic {
 		LocalBuilder out0, height, width, wq, hq;
 		LocalBuilder tex0, loop_i, loop_j;
 		Label body_i, body_j, cond_i, cond_j;
+
+		int tmpVar;
 
 
 		public CodeGenContext (List<Instruction> insList) {
@@ -320,12 +321,14 @@ namespace PixelMagic {
 			colorOut0 = DeclareLocal (typeof (Vector4f), "colorOut0");
 
 			//tex0.x = wq / 2;
-			ilgen.Emit (OpCodes.Ldloca, tex0);
-			ilgen.Emit (OpCodes.Ldloc, wq);
-			ilgen.Emit (OpCodes.Ldc_R4, 2f);
-			ilgen.Emit (OpCodes.Div);
-			ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("set_X"));
-			
+			if (tex0 != null) {
+				ilgen.Emit (OpCodes.Ldloca, tex0);
+				ilgen.Emit (OpCodes.Ldloc, wq);
+				ilgen.Emit (OpCodes.Ldc_R4, 2f);
+				ilgen.Emit (OpCodes.Div);
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("set_X"));
+			}
+
 			loop_i = DeclareLocal (typeof (int), "i");
 			loop_j = DeclareLocal (typeof (int), "j");
 
@@ -343,11 +346,13 @@ namespace PixelMagic {
 			ilgen.MarkLabel (body_i);
 
 			//tex0.y = hq / 2;
-			ilgen.Emit (OpCodes.Ldloca, tex0);
-			ilgen.Emit (OpCodes.Ldloc, hq);
-			ilgen.Emit (OpCodes.Ldc_R4, 2f);
-			ilgen.Emit (OpCodes.Div);
-			ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("set_Y"));
+			if (tex0 != null) {
+				ilgen.Emit (OpCodes.Ldloca, tex0);
+				ilgen.Emit (OpCodes.Ldloc, hq);
+				ilgen.Emit (OpCodes.Ldc_R4, 2f);
+				ilgen.Emit (OpCodes.Div);
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("set_Y"));
+			}
 
 			//j = 0;
 			ilgen.Emit (OpCodes.Ldc_I4_0);
@@ -371,12 +376,14 @@ namespace PixelMagic {
 			
 
 			//tex0.y += hq;
-			ilgen.Emit (OpCodes.Ldloca, tex0);
-			ilgen.Emit (OpCodes.Ldloca, tex0);
-			ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("get_Y"));
-			ilgen.Emit (OpCodes.Ldloc, hq);
-			ilgen.Emit (OpCodes.Add);
-			ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("set_Y"));
+			if (tex0 != null) {
+				ilgen.Emit (OpCodes.Ldloca, tex0);
+				ilgen.Emit (OpCodes.Ldloca, tex0);
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("get_Y"));
+				ilgen.Emit (OpCodes.Ldloc, hq);
+				ilgen.Emit (OpCodes.Add);
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("set_Y"));
+			}
 
 			//++j
 			ilgen.Emit (OpCodes.Ldloc, loop_j);
@@ -392,12 +399,14 @@ namespace PixelMagic {
 
 		
 			//tex0.x += wq;
-			ilgen.Emit (OpCodes.Ldloca, tex0);
-			ilgen.Emit (OpCodes.Ldloca, tex0);
-			ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("get_X"));
-			ilgen.Emit (OpCodes.Ldloc, wq);
-			ilgen.Emit (OpCodes.Add);
-			ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("set_X"));
+			if (tex0 != null) {
+				ilgen.Emit (OpCodes.Ldloca, tex0);
+				ilgen.Emit (OpCodes.Ldloca, tex0);
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("get_X"));
+				ilgen.Emit (OpCodes.Ldloc, wq);
+				ilgen.Emit (OpCodes.Add);
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("set_X"));
+			}
 
 			//++i
 			ilgen.Emit (OpCodes.Ldloc, loop_i);
@@ -466,11 +475,9 @@ namespace PixelMagic {
 			}
 		}
 
-		internal void SampleTexture (int sampler, int texCoord) {
-			if (texCoord != 0)
-				throw new Exception ("can't handle more than one coord register");
+		internal void SampleTexture (int sampler, SrcRegister texReg) {
 			ilgen.Emit (OpCodes.Ldloc, samplerMap [sampler]);
-			ilgen.Emit (OpCodes.Ldloc, tex0);
+			LoadValue (texReg);
 			ilgen.Emit (OpCodes.Call, typeof (Sampler).GetMethod ("Sample"));
 		}
 
@@ -489,9 +496,51 @@ namespace PixelMagic {
 				if (number != 0)
 					throw new Exception ("don't know how to handle colorOut != 0");
 				return colorOut0;
-	
+			case RegKind.Texture: //XXX do number check when we support multiple texture regs
+				return tex0;
 			}
 			throw new Exception ("Invalid reg kind " + kind);
+		}
+
+		internal void EmitTernary (TernaryOp ins) {
+			//FIXME it might be an issue if arguments are not of type Vector4f
+			switch (ins.Operation) {
+			case TernaryOpKind.Cmp: {
+				var mask = DeclareLocal (typeof (Vector4f), "cmp_mask_" + tmpVar++);
+				//mask (tmp = tmp ^ tmp; a < tmp;)
+				LoadValue (ins.Source1);
+				//Can't simply load the zeroed local or mono's jit crashes
+				ilgen.Emit (OpCodes.Ldloca, mask);
+				ilgen.Emit (OpCodes.Initobj, typeof (Vector4f));
+				ilgen.Emit (OpCodes.Ldloc, mask);
+
+				ilgen.Emit (OpCodes.Call, typeof (VectorOperations).GetMethod ("CompareLessThan", new Type[] { typeof (Vector4f), typeof (Vector4f)}));
+				ilgen.Emit (OpCodes.Dup);
+				ilgen.Emit (OpCodes.Stloc, mask);
+
+				//mask & c
+				LoadValue (ins.Source3);
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_Division"));
+
+				//mask.AndNot (b);
+				ilgen.Emit (OpCodes.Ldloc, mask);
+				LoadValue (ins.Source2);
+				ilgen.Emit (OpCodes.Call, typeof (VectorOperations).GetMethod ("AndNot", new Type[] { typeof (Vector4f), typeof (Vector4f)}));
+
+				//res = (mask & c) | mask.AndNot (b);
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_BitwiseOr"));
+				break;
+			} 
+			case TernaryOpKind.Mad: //a * b + c 
+				LoadValue (ins.Source1);
+				LoadValue (ins.Source2);
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_Multiply"));
+				LoadValue (ins.Source3);
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_Addition"));
+				break;
+			default:
+				throw new Exception ("can't handle ternop " + ins.Operation);
+			}
 		}
 
 		internal void EmitBinary (BinOpKind op) {
@@ -510,16 +559,25 @@ namespace PixelMagic {
 			ilgen.Emit (OpCodes.Call, mi);
 		}
 
-		internal void EmitUnary (UnaryOpKind op) {
-			MethodInfo mi = null;
-			switch (op) {
-			case UnaryOpKind.Rcp:
-				mi = typeof (VectorOperations).GetMethod ("Reciprocal");
+		void EmitTempVector4f (float arg) {
+			ilgen.Emit (OpCodes.Ldc_R4, arg);
+			ilgen.Emit (OpCodes.Newobj, typeof (Vector4f).GetConstructor (new Type [] { typeof (float) }));
+		}
+
+		internal void EmitUnary (UnaryOp ins) {
+			switch (ins.Operation) {
+			case UnaryOpKind.Rcp: {
+				EmitTempVector4f (1);
+				LoadValue (ins.Source);
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_Division"));
+				break;
+			} case UnaryOpKind.Frc:
+				LoadValue (ins.Source);
+				ilgen.Emit (OpCodes.Call, typeof (SimdExtras).GetMethod ("FractionalPart"));
 				break;
 			default:
-				throw new Exception ("can't handle unop " + op);
+				throw new Exception ("can't handle unop " + ins.Operation);
 			}
-			ilgen.Emit (OpCodes.Call, mi);
 		}
 
 		void EmitVectorCast (Type src, Type to) {
