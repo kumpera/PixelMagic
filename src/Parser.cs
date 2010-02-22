@@ -182,6 +182,9 @@ namespace PixelMagic {
 				case 0x1F:
 					ins = ParseDcl ();
 					break;
+				case 0x25:
+					ins =  ParseTernary (TernaryOpKind.SinCos);
+					break;
 				case 0x42:
 					ins = ParseTex ();
 					break;

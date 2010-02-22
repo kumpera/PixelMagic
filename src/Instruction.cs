@@ -32,7 +32,8 @@ using Mono.Simd;
 namespace PixelMagic {
 	public enum TernaryOpKind {
 		Mad,
-		Cmp
+		Cmp,
+		SinCos
 	}
 
 
