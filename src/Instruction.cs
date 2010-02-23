@@ -39,7 +39,8 @@ namespace PixelMagic {
 
 	public enum BinOpKind {
 		Add,
-		Mul
+		Mul,
+		Max
 	}
 
 	public enum UnaryOpKind {

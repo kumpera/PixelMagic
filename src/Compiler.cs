@@ -553,6 +553,9 @@ namespace PixelMagic {
 			case BinOpKind.Mul:
 				mi = typeof (Vector4f).GetMethod ("op_Multiply");
 				break;
+			case BinOpKind.Max:
+				mi = typeof (VectorOperations).GetMethod ("Max", new Type[] { typeof (Vector4f), typeof (Vector4f)});
+				break;
 			default:
 				throw new Exception ("can't handle binop " + op);
 			}

@@ -176,6 +176,9 @@ namespace PixelMagic {
 				case 0x06:
 					ins = ParseUnOp (UnaryOpKind.Rcp);
 					break;
+				case 0x0B:
+					ins = ParseBinOp (BinOpKind.Max);
+					break;
 				case 0x13:
 				ins = ParseUnOp (UnaryOpKind.Frc);
 					break;

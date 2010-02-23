@@ -106,7 +106,10 @@ namespace PixelMagic {
 			case BinOpKind.Mul:
 				res = a * b;
 				break;
-				default:
+			case BinOpKind.Max:
+				res = a.Max (b);
+				break;
+			default:
 				throw new Exception ("Cant handle " + ins.Operation);
 		}
 
