@@ -28,6 +28,7 @@ Compiler:
 	Better code can be generated for single component write masks.
 	Detect SSE4 and use BLENDPS for masks.
 	Figure out texture coord regs and generalize current code.
+	Using the Series for JIT'ing SinCos is probably better than calling into x87 junk
 
 Math:
 	Figure out to to implement FRC with decent speed.
