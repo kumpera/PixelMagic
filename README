@@ -42,6 +42,7 @@ TestSuite:
 Mono:
 	JIT "newobj Vector4f" property.
 	When passing float constants to setters/constructors avoid the slow FPU->memory->XMM path.
+	Teach the JIT to emit a constant load in case of constructors where all arguments are constants.
 
 Known Issues
 ============
