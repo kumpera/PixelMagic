@@ -40,6 +40,18 @@ namespace ShaderTestGen
 				Effect = "shaders/MixChannels.ps",
 				InputFile = "images/test3.png"
 			},
+			new TestCase ("directional-blur") {
+				Effect = "shaders/DirectionalBlur.ps",
+				InputFile = "images/test3.png",
+				CreateShader = (tc) => new ScalarShader (tc.Effect) { C0 = 5, C1 = 0.01f },
+				ExtraArgs = "-c0=5 -c1=0.01"
+			},
+			new TestCase ("contrast-ajust") {
+				Effect = "shaders/ContrastAdjust.ps",
+				InputFile = "images/test3.png",
+				CreateShader = (tc) => new ScalarShader (tc.Effect) { C0 = 0.1f, C1 = 0.2f },
+				ExtraArgs = "-c0=0.1 -c1=0.2"
+			},
 		};
 	}
 
