@@ -183,7 +183,6 @@ namespace PixelMagic {
 
 		public void Visit (TernaryOp ins) {
 			ctx.EmitTernary (ins);
-			ctx.StoreValue (ins.Dest);
 		}
 	}
 
@@ -529,17 +528,66 @@ namespace PixelMagic {
 
 				//res = (mask & c) | mask.AndNot (b);
 				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_BitwiseOr"));
+				StoreValue (ins.Dest);
 				break;
 			} 
+
 			case TernaryOpKind.Mad: //a * b + c 
 				LoadValue (ins.Source1);
 				LoadValue (ins.Source2);
 				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_Multiply"));
 				LoadValue (ins.Source3);
 				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_Addition"));
+				StoreValue (ins.Dest);
+				break;
+
+			case TernaryOpKind.SinCos: //.x = cos (a.X) .y = cos (a.X)
+				//XXX maybe we should use the macro expansion provided in the driver docs for HLSL
+				switch (ins.Dest.WriteMask) {
+				case 1: //R cos
+					ApplyMathScalarUnaryToElement (ins.Dest, ins.Source1, "Cos", "X");
+					break;					
+				case 2: //G Sin
+					ApplyMathScalarUnaryToElement (ins.Dest, ins.Source1, "Sin", "Y");
+					break;
+				case 3: //RG
+					ApplyMathScalarUnaryToElement (ins.Dest, ins.Source1, "Cos", "X");
+					ApplyMathScalarUnaryToElement (ins.Dest, ins.Source1, "Sin", "Y");
+					break;
+				default:
+					throw new Exception ("Invalid writeMask for sincos " + ins.Dest.WriteMask.ToString ("X"));
+				}
 				break;
 			default:
 				throw new Exception ("can't handle ternop " + ins.Operation);
+			}
+		}
+
+		void ApplyMathScalarUnaryToElement (DestRegister dest, SrcRegister src, string func, string element) {
+			ilgen.Emit (OpCodes.Ldloca, GetReg (dest.Kind, dest.Number));
+			LoadScalar (src);
+			ilgen.Emit (OpCodes.Call, typeof (Math).GetMethod (func));
+			ilgen.Emit (OpCodes.Conv_R4);
+			ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("set_" + element));
+		}
+
+		void LoadScalar (SrcRegister src) {
+			ilgen.Emit (OpCodes.Ldloca, GetReg (src.Kind, src.Number));
+			switch (src.Swizzle) {
+			case 0: //R 
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("get_X"));
+				break;
+			case (1 << 0) | (1 << 2)  | (1 << 4) | (1 << 6): //G  
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("get_Y"));
+				break;
+			case (2 << 0) | (2 << 2)  | (2 << 4) | (2 << 6): //B
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("get_Z"));
+				break;
+			case (3 << 0) | (3 << 2)  | (3 << 4) | (3 << 6): //A
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("get_W"));
+				break;
+			default:
+				throw new Exception ("Invalid swizzle for scalar " + src.Swizzle.ToString ("X"));
 			}
 		}
 
