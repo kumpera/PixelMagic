@@ -17,6 +17,8 @@ Some of the effects come from (http://wpffx.codeplex.com/).
 TODO
 ====
 
+Figure out what's wrong with lerp-2 and gloom.
+
 Compiler:
 	Write results using a Surface object, this is slow.
 	Specialize for simple samplers so their can be inlined
