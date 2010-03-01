@@ -33,14 +33,16 @@ namespace PixelMagic {
 	public enum TernaryOpKind {
 		Mad,
 		Cmp,
-		SinCos
+		SinCos,
+		Lrp
 	}
 
 
 	public enum BinOpKind {
 		Add,
 		Mul,
-		Max
+		Max,
+		Dp3
 	}
 
 	public enum UnaryOpKind {
