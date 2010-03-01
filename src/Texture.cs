@@ -38,7 +38,12 @@ namespace PixelMagic {
 		public abstract uint Read (int x, int y);
 		public abstract void Write (int x, int y, uint rgba);
 
+		static Vector4f Clamp (Vector4f v) {
+			return v.Max (Vector4f.Zero).Min (Vector4f.One); 
+		}
+
 		public void WriteColor (int x, int y, Vector4f color) {
+			color = Clamp (color);
 			uint r = (uint)Math.Round (color.X * 255);
 			uint g = (uint)Math.Round (color.Y * 255);
 			uint b = (uint)Math.Round (color.Z * 255);
