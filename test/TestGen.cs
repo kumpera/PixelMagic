@@ -52,6 +52,29 @@ namespace ShaderTestGen
 				CreateShader = (tc) => new ScalarShader (tc.Effect) { C0 = 0.1f, C1 = 0.2f },
 				ExtraArgs = "-c0=0.1 -c1=0.2"
 			},
+			new TestCase ("gloom") {
+				Effect = "shaders/Gloom.ps",
+				InputFile = "images/test3.png",
+				CreateShader = (tc) => new ScalarShader (tc.Effect) { C0 = 0.3f, C1 = 0.7f, C2 = 0.7f, C3 = 0.1f },
+				ExtraArgs = "-c0=0.3 -c1=0.7 -c2=0.7 -c3=0.1"
+			},
+			new TestCase ("lerp-1") {
+				Effect = "shaders/Lerp.ps",
+				InputFile = "images/test3.png",
+				CreateShader = (tc) => new ScalarShader (tc.Effect) { C0 = 0.1f },
+				ExtraArgs = "-c0=0.1"
+			},
+			new TestCase ("lerp-2") {
+				Effect = "shaders/Lerp.ps",
+				InputFile = "images/test3.png",
+				CreateShader = (tc) => new ScalarShader (tc.Effect) { C0 = 0.6f },
+				ExtraArgs = "-c0=0.6"
+			},
+			new TestCase ("dot3") {
+				Effect = "shaders/Dot3.ps",
+				InputFile = "images/test3.png"
+			},
+
 		};
 	}
 
