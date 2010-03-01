@@ -109,6 +109,11 @@ namespace PixelMagic {
 			case BinOpKind.Max:
 				res = a.Max (b);
 				break;
+			case BinOpKind.Dp3: //res = dp3
+			 	res = a * b;
+				res = res + res.Shuffle (ShuffleSel.XFromY) + res.Shuffle (ShuffleSel.XFromZ);
+				res = res.Shuffle (ShuffleSel.ExpandX);
+				break;
 			default:
 				throw new Exception ("Cant handle " + ins.Operation);
 		}
@@ -165,6 +170,10 @@ namespace PixelMagic {
 				res.Y = (float)Math.Sin (a.X);
 				break;
 			}
+			case TernaryOpKind.Lrp: //c + a * (b - c)
+				//res = c + (a * (b - c));
+				res = a * b + (Vector4f.One - a) * c;
+				break;
 			default:
 				throw new Exception ("Cant handle " + ins.Operation);
 			}
