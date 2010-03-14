@@ -34,7 +34,8 @@ namespace PixelMagic {
 		Mad,
 		Cmp,
 		SinCos,
-		Lrp
+		Lrp,
+		Dp2Add
 	}
 
 
@@ -42,12 +43,15 @@ namespace PixelMagic {
 		Add,
 		Mul,
 		Max,
-		Dp3
+		Dp3,
+		Min
 	}
 
 	public enum UnaryOpKind {
 		Rcp,
-		Frc
+		Frc,
+		Rsq,
+		Abs
 	}
 
 	public enum TextureKind {

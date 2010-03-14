@@ -176,8 +176,14 @@ namespace PixelMagic {
 				case 0x06:
 					ins = ParseUnOp (UnaryOpKind.Rcp);
 					break;
+				case 0x07:
+					ins = ParseUnOp (UnaryOpKind.Rsq);
+					break;
 				case 0x08:
 					ins = ParseBinOp (BinOpKind.Dp3);
+					break;
+				case 0x0A:
+					ins = ParseBinOp (BinOpKind.Min);
 					break;
 				case 0x0B:
 					ins = ParseBinOp (BinOpKind.Max);
@@ -191,6 +197,9 @@ namespace PixelMagic {
 				case 0x1F:
 					ins = ParseDcl ();
 					break;
+				case 0x23:
+					ins = ParseUnOp (UnaryOpKind.Abs);
+					break;
 				case 0x25:
 					ins =  ParseTernary (TernaryOpKind.SinCos);
 					break;
@@ -199,6 +208,9 @@ namespace PixelMagic {
 					break;
 				case 0x51:
 					ins = ParseDef ();
+					break;
+				case 0x5A:
+					ins = ParseTernary (TernaryOpKind.Dp2Add);
 					break;
 				case 0x58:
 					ins = ParseTernary (TernaryOpKind.Cmp);
