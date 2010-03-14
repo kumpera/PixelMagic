@@ -114,6 +114,9 @@ namespace PixelMagic {
 				res = res + res.Shuffle (ShuffleSel.XFromY) + res.Shuffle (ShuffleSel.XFromZ);
 				res = res.Shuffle (ShuffleSel.ExpandX);
 				break;
+			case BinOpKind.Min:
+				res = a.Min (b);
+				break;
 			default:
 				throw new Exception ("Cant handle " + ins.Operation);
 		}
@@ -126,13 +129,19 @@ namespace PixelMagic {
 			Vector4f a = ctx.ReadValue (ins.Source);
 			Vector4f res = new Vector4f ();
 			switch (ins.Operation) {
-			case UnaryOpKind.Rcp: {
+			case UnaryOpKind.Rcp:
 				//Reciprocal intrinsic precision is too small
 				res = new Vector4f (1f) / a;
 				break;
-			}
 			case UnaryOpKind.Frc:
 				res = a.FractionalPart ();
+				break;
+			case UnaryOpKind.Rsq:
+				//Reciprocal intrinsic precision is too small
+				res = a.SquareRootReciprocal ();
+				break;
+			case UnaryOpKind.Abs:
+				res = a.Absolute ();
 				break;
 			default:
 				throw new Exception ("Cant handle " + ins.Operation);
@@ -173,6 +182,12 @@ namespace PixelMagic {
 			case TernaryOpKind.Lrp: //c + a * (b - c)
 				//res = c + (a * (b - c));
 				res = a * b + (Vector4f.One - a) * c;
+				break;
+			case TernaryOpKind.Dp2Add: //res = a.r * b.r + a.g * b.g + c.swizzle
+			 	res = a * b;
+				//XX we could use Hadd here
+				res = res + res.Shuffle (ShuffleSel.XFromY) + c;
+				res = res.Shuffle (ShuffleSel.ExpandX);
 				break;
 			default:
 				throw new Exception ("Cant handle " + ins.Operation);
