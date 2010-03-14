@@ -12,7 +12,7 @@ FILES = Cairo.cs \
 	Tracing.cs
 	
 shader.exe: ${FILES}
-	gmcs /unsafe /r:Mono.Simd /out:shader.exe ${FILES}
+	gmcs /unsafe -debug /r:Mono.Simd /out:shader.exe ${FILES}
 
 run: shader.exe
 	mono shader.exe
