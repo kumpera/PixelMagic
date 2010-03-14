@@ -506,20 +506,20 @@ namespace PixelMagic {
 			switch (ins.Operation) {
 			case TernaryOpKind.Cmp: {
 				var mask = DeclareLocal (typeof (Vector4f), "cmp_mask_" + tmpVar++);
-				//mask (tmp = tmp ^ tmp; a < tmp;)
-				LoadValue (ins.Source1);
-				//Can't simply load the zeroed local or mono's jit crashes
+				//mask = 0
 				ilgen.Emit (OpCodes.Ldloca, mask);
 				ilgen.Emit (OpCodes.Initobj, typeof (Vector4f));
-				ilgen.Emit (OpCodes.Ldloc, mask);
 
+				//a < tmp
+				LoadValue (ins.Source1);
+				ilgen.Emit (OpCodes.Ldloc, mask);
 				ilgen.Emit (OpCodes.Call, typeof (VectorOperations).GetMethod ("CompareLessThan", new Type[] { typeof (Vector4f), typeof (Vector4f)}));
-				ilgen.Emit (OpCodes.Dup);
 				ilgen.Emit (OpCodes.Stloc, mask);
 
 				//mask & c
+				ilgen.Emit (OpCodes.Ldloc, mask);
 				LoadValue (ins.Source3);
-				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_Division"));
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_BitwiseAnd"));
 
 				//mask.AndNot (b);
 				ilgen.Emit (OpCodes.Ldloc, mask);
