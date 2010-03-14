@@ -74,6 +74,12 @@ namespace ShaderTestGen
 				Effect = "shaders/Dot3.ps",
 				InputFile = "images/test3.png"
 			},
+			new TestCase ("banded-swirl") {
+				Effect = "shaders/BandedSwirl.ps",
+				CreateShader = (tc) => new ScalarShader (tc.Effect) { P0 = new Point (0.6f, 0.6f), C1 = 0.5f, C2 = 0.2f },
+				InputFile = "images/test3.png",
+				ExtraArgs = "-p0=0.6,0.6 -c1=0.5 -c2=0.2"
+			},
 
 		};
 	}

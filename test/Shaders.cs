@@ -35,16 +35,21 @@ namespace ShaderTestGen
 	public class ScalarShader : Shader
 	{
 		static readonly DependencyProperty[] ScalarProperties = new DependencyProperty [32];
+		static readonly DependencyProperty[] PointProperties = new DependencyProperty [32];
 
 		static ScalarShader () {
 			for (int i = 0; i < 32; ++i)
-			ScalarProperties [i] = DependencyProperty.Register ("C" + i, typeof (float), typeof (ScalarShader), new UIPropertyMetadata (0f, PixelShaderConstantCallback (i)));
+				ScalarProperties [i] = DependencyProperty.Register ("C" + i, typeof (float), typeof (ScalarShader), new UIPropertyMetadata (0f, PixelShaderConstantCallback (i)));
+				for (int i = 0; i < 32; ++i)
+					PointProperties [i] = DependencyProperty.Register ("P" + i, typeof (Point), typeof (ScalarShader), new UIPropertyMetadata (new Point(0, 0), PixelShaderConstantCallback (i)));
 		}
 
 		public ScalarShader (string uri) : base (uri)
 		{
 			for (int i = 0; i < 32; ++i)
 				UpdateShaderValue (ScalarProperties [i]);
+			for (int i = 0; i < 32; ++i)
+				UpdateShaderValue (PointProperties [i]);
 		}
 
 		public float C0
@@ -81,6 +86,12 @@ namespace ShaderTestGen
 		{
 			get { return (float)GetValue (ScalarProperties [5]); }
 			set { SetValue (ScalarProperties [5], value); }
+		}
+
+		public Point P0
+		{
+			get { return (Point)GetValue (PointProperties [0]); }
+			set { SetValue (PointProperties [0], value); }
 		}
 	}
 }
