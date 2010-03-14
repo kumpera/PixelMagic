@@ -561,6 +561,47 @@ namespace PixelMagic {
 					throw new Exception ("Invalid writeMask for sincos " + ins.Dest.WriteMask.ToString ("X"));
 				}
 				break;
+			case TernaryOpKind.Lrp:  //a * b + (1 - a) * c;
+				//a * b
+				LoadValue (ins.Source1);
+				LoadValue (ins.Source2);
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_Multiply"));
+				//1 - a
+				EmitTempVector4f (1);
+				LoadValue (ins.Source1);
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_Subtraction"));
+				// (1 - a) * c
+				LoadValue (ins.Source3);
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_Multiply"));
+
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_Addition"));
+				StoreValue (ins.Dest);
+				break;
+			case TernaryOpKind.Dp2Add: {//res = a.r * b.r + a.g * b.g + c.swizzle
+				LoadValue (ins.Source1);
+				LoadValue (ins.Source2);
+				LoadValue (ins.Source3);
+				ilgen.Emit (OpCodes.Call, typeof (SimdExtras).GetMethod ("Dp2Add"));
+				StoreValue (ins.Dest);
+				break;
+
+				//a * b
+				LoadValue (ins.Source1);
+				LoadValue (ins.Source2);
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_Multiply"));
+				ilgen.Emit (OpCodes.Dup);
+
+				//FIXME we could use HorizontalAdd here
+				EmitShuffle (ShuffleSel.XFromY); //[x,y,_,_] [y,y,_,_]
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_Addition")); //[x + y,_,_,_]
+
+				//+c.swizzle
+				LoadValue (ins.Source3);
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_Addition"));
+				EmitShuffle (ShuffleSel.ExpandX);
+				StoreValue (ins.Dest);
+				break;
+			}
 			default:
 				throw new Exception ("can't handle ternop " + ins.Operation);
 			}
@@ -594,6 +635,11 @@ namespace PixelMagic {
 			}
 		}
 
+		void EmitShuffle (ShuffleSel shuffle) {
+			ilgen.Emit (OpCodes.Ldc_I4, (int)shuffle);
+			ilgen.Emit (OpCodes.Call, typeof (VectorOperations).GetMethod ("Shuffle", new Type[] { typeof (Vector4f), typeof (ShuffleSel)}));
+		}
+
 		internal void EmitBinary (BinOpKind op) {
 			//FIXME it might be an issue if arguments are not of type Vector4f
 			MethodInfo mi = null;
@@ -607,10 +653,27 @@ namespace PixelMagic {
 			case BinOpKind.Max:
 				mi = typeof (VectorOperations).GetMethod ("Max", new Type[] { typeof (Vector4f), typeof (Vector4f)});
 				break;
+			case BinOpKind.Dp3:
+				//This is a very fuck'd up code sequence, figure out how to speed it up
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_Multiply"));
+				ilgen.Emit (OpCodes.Dup);
+				ilgen.Emit (OpCodes.Dup);
+				//FIXME we could use HorizontalAdd for this step
+				EmitShuffle (ShuffleSel.XFromY); //[x,y,z,w] [x,y,z,w] [y,y,z,w]
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_Addition")); //[x,y,z,w] [x + y,_,_,_]
+
+				EmitShuffle (ShuffleSel.ZFromY); //[x,y,z,w] [_,_,x + y, _]
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_Addition")); //[_,_, x + y + z, _]
+				EmitShuffle (ShuffleSel.ExpandZ); //[dp3, dp3, dp3, dp3]
+				break;
+			case BinOpKind.Min:
+				mi = typeof (VectorOperations).GetMethod ("Min", new Type[] { typeof (Vector4f), typeof (Vector4f)});
+				break;
 			default:
 				throw new Exception ("can't handle binop " + op);
 			}
-			ilgen.Emit (OpCodes.Call, mi);
+			if (mi != null)
+				ilgen.Emit (OpCodes.Call, mi);
 		}
 
 		void EmitTempVector4f (float arg) {
@@ -620,14 +683,22 @@ namespace PixelMagic {
 
 		internal void EmitUnary (UnaryOp ins) {
 			switch (ins.Operation) {
-			case UnaryOpKind.Rcp: {
+			case UnaryOpKind.Rcp:
 				EmitTempVector4f (1);
 				LoadValue (ins.Source);
 				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_Division"));
 				break;
-			} case UnaryOpKind.Frc:
+			case UnaryOpKind.Frc:
 				LoadValue (ins.Source);
 				ilgen.Emit (OpCodes.Call, typeof (SimdExtras).GetMethod ("FractionalPart"));
+				break;
+			case UnaryOpKind.Rsq:
+				LoadValue (ins.Source);
+				ilgen.Emit (OpCodes.Call, typeof (SimdExtras).GetMethod ("SquareRootReciprocal"));
+				break;
+			case UnaryOpKind.Abs:
+				LoadValue (ins.Source);
+				ilgen.Emit (OpCodes.Call, typeof (SimdExtras).GetMethod ("Absolute"));
 				break;
 			default:
 				throw new Exception ("can't handle unop " + ins.Operation);
@@ -689,10 +760,8 @@ namespace PixelMagic {
 		internal void LoadValue (SrcRegister src) {
 			ilgen.Emit (OpCodes.Ldloc, GetReg (src.Kind, src.Number));
 
-			if (src.Swizzle != SrcRegister.MakeSwizzle (0, 1, 2, 3)) {
-				ilgen.Emit (OpCodes.Ldc_I4, src.Swizzle);
-				ilgen.Emit (OpCodes.Call, typeof (VectorOperations).GetMethod ("Shuffle", new Type[] { typeof (Vector4f), typeof (ShuffleSel)}));
-			}
+			if (src.Swizzle != SrcRegister.MakeSwizzle (0, 1, 2, 3))
+				EmitShuffle ((ShuffleSel)src.Swizzle);
 
 			switch (src.Modifier) {
 			case SrcModifier.None:
