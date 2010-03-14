@@ -43,7 +43,12 @@ namespace PixelMagic {
 				{ "t|trace", "Enable tracing of execution (best used with --interpreter).", v => trace = true },
 				{ "i|interpreter", "Use the interpreter instead of the JIT.", v => interpreter = true },
 				{ "h|help", "Show this message and exit.", v => help = true },
-				{ "c:", "Set the value of a constant register", (k, v) =>  sd.SetConstant (int.Parse (k), float.Parse (v)) }
+				{ "c:", "Set the scalar value of a constant register", (k, v) =>  sd.SetConstant (int.Parse (k), float.Parse (v)) },
+				{ "p:", "Set the pointer value of a constant register", (k, v) => {
+					var coords = v.Split (new char[] {','});
+					sd.SetConstant (int.Parse (k), float.Parse (coords [0]), float.Parse (coords [1]));
+					}
+				}
 			};
 
 			List<string> extra;

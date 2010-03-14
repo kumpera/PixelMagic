@@ -47,6 +47,10 @@ namespace PixelMagic {
 			constants [idx] = new Vector4f (value);
 		}
 
+		public void SetConstant (int idx, float v0, float v1) {
+			constants [idx] = new Vector4f (v0, v1, 0, 0);
+		}
+
 		public Sampler GetSampler (int idx) {
 			return samplers [idx];
 		}
