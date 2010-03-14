@@ -207,7 +207,6 @@ namespace PixelMagic {
 
 		int tmpVar;
 
-
 		public CodeGenContext (List<Instruction> insList) {
 			AssemblyName assemblyName = new AssemblyName ();
 			assemblyName.Name = ASSEMBLY_NAME;
@@ -263,6 +262,10 @@ namespace PixelMagic {
 			ilgen.Emit (OpCodes.Ldc_R4, val.Z);
 			ilgen.Emit (OpCodes.Ldc_R4, val.W);
 			ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetConstructor (new Type [] {typeof (float), typeof (float), typeof (float), typeof (float) }));
+		}
+
+		LocalBuilder DeclareTmp (Type type) {
+			return DeclareLocal (type, "_tmp_" + tmpVar++);
 		}
 	
 		LocalBuilder DeclareLocal (Type type, string name) {
@@ -505,7 +508,7 @@ namespace PixelMagic {
 			//FIXME it might be an issue if arguments are not of type Vector4f
 			switch (ins.Operation) {
 			case TernaryOpKind.Cmp: {
-				var mask = DeclareLocal (typeof (Vector4f), "cmp_mask_" + tmpVar++);
+				var mask = DeclareTmp (typeof (Vector4f));
 				//mask = 0
 				ilgen.Emit (OpCodes.Ldloca, mask);
 				ilgen.Emit (OpCodes.Initobj, typeof (Vector4f));
