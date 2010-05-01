@@ -57,5 +57,5 @@ Mono 2.6 release on OSX miscompiles Mono.Simd code. Trunk works fine, check tip 
 Links
 =====
 
-HLSL reference: http://msdn.microsoft.com/en-us/library/ee418149(VS.85).aspx
-Shader codes: http://msdn.microsoft.com/en-us/library/ms800355.aspx
+HLSL reference: http://msdn.microsoft.com/en-us/library/bb219847(VS.85).aspx
+Shader codes: http://msdn.microsoft.com/en-us/library/ff552891(VS.85).aspx
