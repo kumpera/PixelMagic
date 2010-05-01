@@ -117,6 +117,13 @@ namespace PixelMagic {
 				res = res + res.Shuffle (ShuffleSel.XFromY) + res.Shuffle (ShuffleSel.XFromZ);
 				res = res.Shuffle (ShuffleSel.ExpandX);
 				break;
+			case BinOpKind.Dp4: //res = dp4
+			 	res = a * b;
+				res = res + res.Shuffle (ShuffleSel.XFromY | ShuffleSel.ZFromW); //[x + y, _, w + z, _   
+				res = res + res.Shuffle (ShuffleSel.XFromZ); //[x + y + w + z, ??]
+				res = res.Shuffle (ShuffleSel.ExpandX);
+				break;
+
 			case BinOpKind.Min:
 				res = a.Min (b);
 				break;

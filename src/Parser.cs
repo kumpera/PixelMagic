@@ -188,6 +188,9 @@ namespace PixelMagic {
 				case 0x08:
 					ins = ParseBinOp (BinOpKind.Dp3);
 					break;
+				case 0x09:
+					ins = ParseBinOp (BinOpKind.Dp4);
+					break;
 				case 0x0A:
 					ins = ParseBinOp (BinOpKind.Min);
 					break;

@@ -45,6 +45,7 @@ namespace PixelMagic {
 		Mul,
 		Max,
 		Dp3,
+		Dp4,
 		Min
 	}
 

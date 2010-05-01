@@ -678,6 +678,19 @@ namespace PixelMagic {
 				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_Addition")); //[_,_, x + y + z, _]
 				EmitShuffle (ShuffleSel.ExpandZ); //[dp3, dp3, dp3, dp3]
 				break;
+			case BinOpKind.Dp4:
+				//We should use things like HorizontalAdd  or the new Dp instruction
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_Multiply"));
+				ilgen.Emit (OpCodes.Dup);
+
+				EmitShuffle (ShuffleSel.XFromY | ShuffleSel.ZFromW); //[x,y,z,w] [y,y,w,w]
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_Addition")); //[x + y,_,z + w,_]
+				ilgen.Emit (OpCodes.Dup); //[x + y,_,z + w,_] [x + y,_,z + w,_]
+
+				EmitShuffle (ShuffleSel.XFromZ); //[x + y,_,_,_] [z + w,_,_,_]
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_Addition")); //[x + y + z + w,_,_,_]
+				EmitShuffle (ShuffleSel.ExpandX); //[dp4, dp4, dp4, dp4]
+				break;
 			case BinOpKind.Min:
 				mi = typeof (VectorOperations).GetMethod ("Min", new Type[] { typeof (Vector4f), typeof (Vector4f)});
 				break;
