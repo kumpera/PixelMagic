@@ -170,6 +170,9 @@ namespace PixelMagic {
 				case 0x02:
 					ins = ParseBinOp (BinOpKind.Add);
 					break;
+				case 0x03:
+					ins = ParseBinOp (BinOpKind.Sub);
+					break;
 				case 0x4:
 					ins = ParseTernary (TernaryOpKind.Mad);
 					break;

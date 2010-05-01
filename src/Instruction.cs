@@ -41,6 +41,7 @@ namespace PixelMagic {
 
 	public enum BinOpKind {
 		Add,
+		Sub,
 		Mul,
 		Max,
 		Dp3,

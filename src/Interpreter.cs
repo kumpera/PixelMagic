@@ -103,6 +103,9 @@ namespace PixelMagic {
 			case BinOpKind.Add:
 				res = a + b;
 				break;
+			case BinOpKind.Sub:
+				res = a - b;
+				break;
 			case BinOpKind.Mul:
 				res = a * b;
 				break;

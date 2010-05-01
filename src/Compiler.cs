@@ -656,6 +656,9 @@ namespace PixelMagic {
 			case BinOpKind.Add:
 				mi = typeof (Vector4f).GetMethod ("op_Addition");
 				break;
+			case BinOpKind.Sub:
+				mi = typeof (Vector4f).GetMethod ("op_Subtraction");
+				break;
 			case BinOpKind.Mul:
 				mi = typeof (Vector4f).GetMethod ("op_Multiply");
 				break;
