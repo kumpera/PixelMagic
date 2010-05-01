@@ -161,6 +161,9 @@ namespace PixelMagic {
 			} else {
 				Instruction ins = null;
 				switch (kind) {
+				case 0x00:
+					ins = new Nop ();
+					break;
 				case 0x01:
 					ins = ParseMov ();
 					break;
@@ -187,6 +190,12 @@ namespace PixelMagic {
 					break;
 				case 0x0B:
 					ins = ParseBinOp (BinOpKind.Max);
+					break;
+				case 0x0E:
+					ins = ParseUnOp (UnaryOpKind.Exp);
+					break;
+				case 0x0F:
+					ins = ParseUnOp (UnaryOpKind.Log);
 					break;
 				case 0x12:
 					ins = ParseTernary (TernaryOpKind.Lrp);

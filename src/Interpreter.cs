@@ -196,6 +196,9 @@ namespace PixelMagic {
 			if (Tracing.Enabled) Console.WriteLine ("{0} {1} {2} {3} => {4}/{5}/{6} == {7}", ins.Source1, ins.Operation, ins.Source2, ins.Source3, a, b, c, res);
 			ctx.StoreValue (ins.Dest, res);	
 		}
+
+		public void Visit (Nop nop) {
+		}
 	}
 
 	internal class ShaderContext {

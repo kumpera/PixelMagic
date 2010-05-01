@@ -65,6 +65,9 @@ namespace PixelMagic {
 
 		public void Visit (TernaryOp ins) {
 		}
+
+		public void Visit (Nop nop) {
+		}
 	}
 
 	internal class ShaderRequisitesVisitor : InstructionVisitor {
@@ -142,6 +145,9 @@ namespace PixelMagic {
 			VisitSrcReg (ins.Source3);
 			VisitDestReg (ins.Dest);
 		}
+
+		public void Visit (Nop nop) {
+		}
 	}
 
 	internal class CodeGenVisitor : InstructionVisitor {
@@ -183,6 +189,9 @@ namespace PixelMagic {
 
 		public void Visit (TernaryOp ins) {
 			ctx.EmitTernary (ins);
+		}
+
+		public void Visit (Nop nop) {
 		}
 	}
 

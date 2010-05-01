@@ -51,7 +51,9 @@ namespace PixelMagic {
 		Rcp,
 		Frc,
 		Rsq,
-		Abs
+		Abs,
+		Exp,
+		Log
 	}
 
 	public enum TextureKind {
@@ -69,12 +71,19 @@ namespace PixelMagic {
 		void Visit (BinaryOp ins);
 		void Visit (UnaryOp ins);
 		void Visit (Mov ins);
+		void Visit (Nop nop);
 	}
 
 	public abstract class Instruction {
 		public SrcRegister Predicate { get; set; }
 
 		public abstract void Visit (InstructionVisitor visitor);
+	}
+
+	public class Nop : Instruction {
+		public override void Visit (InstructionVisitor visitor) {
+			visitor.Visit (this);
+		}
 	}
 
 	public class SetConst : Instruction {
