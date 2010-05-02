@@ -197,6 +197,12 @@ namespace PixelMagic {
 				case 0x0B:
 					ins = ParseBinOp (BinOpKind.Max);
 					break;
+				case 0x0C:
+					ins = ParseBinOp (BinOpKind.Slt);
+					break;
+				case 0x0D:
+					ins = ParseBinOp (BinOpKind.Sge);
+					break;
 				case 0x0E:
 					ins = ParseUnOp (UnaryOpKind.Exp);
 					break;

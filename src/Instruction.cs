@@ -46,7 +46,9 @@ namespace PixelMagic {
 		Max,
 		Dp3,
 		Dp4,
-		Min
+		Min,
+		Slt,
+		Sge,
 	}
 
 	public enum UnaryOpKind {

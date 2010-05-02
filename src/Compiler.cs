@@ -694,6 +694,17 @@ namespace PixelMagic {
 			case BinOpKind.Min:
 				mi = typeof (VectorOperations).GetMethod ("Min", new Type[] { typeof (Vector4f), typeof (Vector4f)});
 				break;
+			case BinOpKind.Slt:
+			case BinOpKind.Sge:
+				//XXX hoist the constant out of the loop
+				mi = typeof (VectorOperations).GetMethod ("CompareLessThan", new Type[] { typeof (Vector4f), typeof (Vector4f)});
+				ilgen.Emit (OpCodes.Ldc_R4, 1f);
+				ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetConstructor (new Type [] {typeof (float) }));
+				if (op == BinOpKind.Slt)
+					ilgen.Emit (OpCodes.Call, typeof (Vector4f).GetMethod ("op_BitwiseAnd"));
+				else
+					ilgen.Emit (OpCodes.Call, typeof (VectorOperations).GetMethod ("AndNot", new Type[] { typeof (Vector4f), typeof (Vector4f)}));
+				break;
 			default:
 				throw new Exception ("can't handle binop " + op);
 			}

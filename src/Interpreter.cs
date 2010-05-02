@@ -127,6 +127,16 @@ namespace PixelMagic {
 			case BinOpKind.Min:
 				res = a.Min (b);
 				break;
+
+			case BinOpKind.Slt:
+				res = a.CompareLessThan (b) & new Vector4f (1);
+				break;
+
+			case BinOpKind.Sge:
+				/*SSE doesn't have >=, so we use < and invert the operands*/
+				res = b.CompareLessThan (a) & new Vector4f (1);
+				break;
+
 			default:
 				throw new Exception ("Cant handle " + ins.Operation);
 		}
